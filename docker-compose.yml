@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  ecommerce-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: ecommerce-app
+
+    ports:
+      - "80:80"
+
+    restart: always
