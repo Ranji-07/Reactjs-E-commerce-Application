@@ -1,18 +1,21 @@
 #!/bin/bash
 
-IMAGE_NAME="ecommerce-app"
-IMAGE_TAG="v1"
+set -e
 
-echo "Building Docker image..."
+IMAGE_NAME=${1:-ecommerce-app}
+IMAGE_TAG=${2:-v1}
+
+echo "====================================="
+echo "Building Docker Image"
+echo "Image Name : $IMAGE_NAME"
+echo "Image Tag  : $IMAGE_TAG"
+echo "====================================="
 
 docker build -t $IMAGE_NAME:$IMAGE_TAG .
 
-if [ $? -eq 0 ]; then
-    echo "Docker image built successfully."
-else
-    echo "Docker build failed."
-    exit 1
-fi
+echo ""
+echo "Build completed successfully."
 
+echo ""
 echo "Available Images:"
 docker images | grep $IMAGE_NAME
