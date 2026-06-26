@@ -4,30 +4,27 @@ set -e
 
 CONTAINER_NAME="ecommerce-app"
 
-IMAGE_NAME=${1:-ecommerce-app}
-IMAGE_TAG=${2:-v1}
+IMAGE_NAME=$1
+IMAGE_TAG=$2
 
-echo "====================================="
-echo "Deploying Application"
-echo "Container : $CONTAINER_NAME"
-echo "Image     : $IMAGE_NAME"
-echo "Tag       : $IMAGE_TAG"
-echo "====================================="
-
-echo "Stopping existing container..."
+echo "Stopping old container..."
 
 docker stop $CONTAINER_NAME || true
+
 docker rm $CONTAINER_NAME || true
+
+echo "Pulling latest image..."
+
+docker pull $IMAGE_NAME:$IMAGE_TAG
 
 echo "Starting new container..."
 
 docker run -d \
   --name $CONTAINER_NAME \
-  -p 80:80 \
   --restart always \
+  -p 80:80 \
   $IMAGE_NAME:$IMAGE_TAG
 
-echo ""
 echo "Deployment completed."
 
 docker ps
