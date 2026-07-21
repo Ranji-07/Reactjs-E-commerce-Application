@@ -1,238 +1,465 @@
-# <div align="center">👋 Welcome to My Professional Portfolio</div>
+# React E-Commerce Application - DevOps & AWS Practice Project
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Jenkins](https://img.shields.io/badge/Jenkins-D24939?style=for-the-badge&logo=jenkins&logoColor=white)](https://www.jenkins.io/)
+[![AWS](https://img.shields.io/badge/AWS-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://aws.amazon.com/)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)](https://kubernetes.io/)
+[![DevOps](https://img.shields.io/badge/DevOps-Practice-blueviolet?style=for-the-badge)](https://github.com/Ranji-07/Reactjs-E-commerce-Application)
+
+> 🎓 **Comprehensive DevOps & AWS Practice Project** - Learn and implement real-world DevOps practices including Docker, Jenkins CI/CD, AWS deployment, and cloud infrastructure automation.
+
+## 🎯 Project Overview
+
+This is a **hands-on practice project** designed to master DevOps and AWS technologies. It implements:
+
+- 🐳 **Docker containerization** with multi-stage builds
+- 📦 **Docker Hub registry** with dev/prod separation
+- 🔄 **Jenkins CI/CD pipeline** with GitHub integration
+- ☁️ **AWS deployment** on EC2 instances
+- 🛡️ **Security groups** and network configuration
+- 📊 **Application monitoring** and health checks
+- 🔐 **Version control** best practices
+
+## 📚 Learning Objectives
+
+This project helps you practice:
+
+### Container & Registry
+- ✅ Docker image creation and optimization
+- ✅ Docker Compose for local development
+- ✅ Docker Hub repository management
+- ✅ Public vs Private repository setup
+- ✅ Image versioning and tagging strategies
+
+### CI/CD & Automation
+- ✅ Jenkins installation and configuration
+- ✅ GitHub webhook integration
+- ✅ Automated build triggers
+- ✅ Multi-branch pipeline strategies
+- ✅ Build automation scripts (Bash)
+
+### AWS Deployment
+- ✅ EC2 instance launch and configuration
+- ✅ Security Group setup and management
+- ✅ Security best practices (IP whitelisting)
+- ✅ Application deployment on AWS
+- ✅ Infrastructure monitoring
+
+### Monitoring & Health Checks
+- ✅ Application health monitoring
+- ✅ Log aggregation and analysis
+- ✅ Alert configuration
+- ✅ Notification systems
+- ✅ Downtime detection
+
+## 🛠️ Tech Stack
+
+| Component | Technology | Purpose |
+|-----------|-----------|----------|
+| **Frontend** | React 18+ | Application UI |
+| **Backend** | Node.js, Express | REST APIs |
+| **Containerization** | Docker | Application packaging |
+| **Registry** | Docker Hub | Image storage |
+| **CI/CD** | Jenkins | Automation pipeline |
+| **Version Control** | GitHub | Code repository |
+| **Deployment** | AWS EC2 | Application hosting |
+| **Monitoring** | Open-source tools | Health tracking |
+
+## 🏗️ Project Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    GitHub Repository                         │
+│              (dev branch & master branch)                    │
+└────────────────────┬────────────────────────────────────────┘
+                     │
+                     ▼ (Webhook Trigger)
+        ┌────────────────────────────┐
+        │   Jenkins CI/CD Pipeline   │
+        │  ┌──────────────────────┐  │
+        │  │  Source: GitHub      │  │
+        │  │  Build: CodeBuild    │  │
+        │  │  Deploy: AWS EC2     │  │
+        │  └──────────────────────┘  │
+        └───────────┬────────────────┘
+                    │
+         ┌──────────┴──────────┐
+         │                     │
+         ▼ (dev branch)        ▼ (master branch)
+    ┌─────────────┐      ┌──────────────┐
+    │ Docker Hub  │      │  Docker Hub  │
+    │  (dev repo) │      │ (prod repo)  │
+    │  PUBLIC     │      │  PRIVATE     │
+    └─────────────┘      └──────────────┘
+         │                     │
+         └──────────┬──────────┘
+                    │
+                    ▼
+        ┌────────────────────────────┐
+        │   AWS EC2 Instance         │
+        │   (t2.micro)               │
+        │  ┌──────────────────────┐  │
+        │  │ Security Group       │  │
+        │  │ - App access: Any    │  │
+        │  │ - SSH: Your IP only  │  │
+        │  └──────────────────────┘  │
+        └───────────┬────────────────┘
+                    │
+                    ▼
+        ┌────────────────────────────┐
+        │   Monitoring System        │
+        │  - Health Checks           │
+        │  - Logs & Alerts           │
+        │  - Notifications           │
+        └────────────────────────────┘
+```
+
+## 📋 Implementation Checklist
+
+### Docker Implementation ✅
+- [x] **Dockerfile** - Multi-stage build
+  ```dockerfile
+  # Build stage
+  FROM node:18-alpine AS builder
+  WORKDIR /app
+  COPY package*.json ./
+  RUN npm ci
+  COPY . .
+  RUN npm run build
+  
+  # Runtime stage
+  FROM node:18-alpine
+  WORKDIR /app
+  COPY --from=builder /app/node_modules ./
+  COPY --from=builder /app/dist ./dist
+  EXPOSE 3000
+  CMD ["node", "dist/server.js"]
+  ```
+- [x] **docker-compose.yml** - Multi-service setup
+  ```yaml
+  version: '3.8'
+  services:
+    app:
+      build: .
+      ports:
+        - "3000:3000"
+      environment:
+        - NODE_ENV=development
+      depends_on:
+        - db
+    db:
+      image: postgres:15
+      environment:
+        - POSTGRES_PASSWORD=password
+  ```
+- [x] **.gitignore & .dockerignore** - Clean repository
+
+### Bash Scripting ✅
+- [x] **build.sh** - Docker image building
+  ```bash
+  #!/bin/bash
+  REGISTRY="your-dockerhub-username"
+  IMAGE_NAME="react-ecommerce"
+  
+  docker build -t $REGISTRY/$IMAGE_NAME:latest .
+  echo "Image built: $REGISTRY/$IMAGE_NAME:latest"
+  ```
+- [x] **deploy.sh** - Application deployment
+  ```bash
+  #!/bin/bash
+  IMAGE="react-ecommerce:latest"
+  CONTAINER_NAME="react-app"
+  
+  docker stop $CONTAINER_NAME || true
+  docker run -d --name $CONTAINER_NAME -p 3000:3000 $IMAGE
+  echo "Application deployed"
+  ```
+
+### Version Control ✅
+- [x] **GitHub repository** with dev & master branches
+- [x] **.gitignore** - Exclude unnecessary files
+- [x] **CLI git workflow**
+  ```bash
+  git checkout dev
+  git add .
+  git commit -m "feat: your feature"
+  git push origin dev
+  ```
+
+### Docker Hub Setup ✅
+- [x] **dev repository** - PUBLIC
+  - Automatic builds from dev branch
+  - Development images
+  - Auto-pushed on every dev commit
+- [x] **prod repository** - PRIVATE
+  - Production images only
+  - Pushed on master branch merges
+  - Access-controlled
+
+### Jenkins CI/CD Pipeline ✅
+- [x] **Jenkins Installation**
+  ```bash
+  # Ubuntu/Debian
+  java -version
+  wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -
+  sudo apt-get update
+  sudo apt-get install jenkins
+  ```
+- [x] **GitHub Integration**
+  - Webhook configuration: `http://jenkins-server:8080/github-webhook/`
+  - SSH key setup for repository access
+  - Branch-specific triggers
+- [x] **Build Pipeline Stages**
+  ```groovy
+  pipeline {
+    agent any
+    triggers {
+      githubPush()
+    }
+    stages {
+      stage('Checkout') {
+        steps {
+          git branch: '${GIT_BRANCH}', url: 'https://github.com/Ranji-07/Reactjs-E-commerce-Application.git'
+        }
+      }
+      stage('Build') {
+        steps {
+          sh './scripts/build.sh'
+        }
+      }
+      stage('Push to Docker Hub') {
+        steps {
+          sh './scripts/push.sh'
+        }
+      }
+      stage('Deploy') {
+        steps {
+          sh './scripts/deploy.sh'
+        }
+      }
+    }
+  }
+  ```
+- [x] **Multi-branch Triggers**
+  - **dev branch** → Build & Push to dev repo
+  - **master branch** → Build & Push to prod repo
+
+### AWS EC2 Deployment ✅
+- [x] **EC2 Instance Launch**
+  ```bash
+  # Instance type: t2.micro
+  # OS: Ubuntu 20.04 LTS
+  # Storage: 30GB
+  ```
+- [x] **Security Group Configuration**
+  ```
+  Inbound Rules:
+  ├─ HTTP (80): 0.0.0.0/0 (Anyone)
+  ├─ HTTPS (443): 0.0.0.0/0 (Anyone)
+  ├─ Custom TCP (3000): 0.0.0.0/0 (App Access)
+  └─ SSH (22): YOUR_IP_ADDRESS/32 (SSH Only from Your IP)
+  
+  Outbound Rules:
+  └─ All traffic allowed
+  ```
+- [x] **Server Setup**
+  ```bash
+  # SSH into instance
+  ssh -i key.pem ubuntu@instance-ip
+  
+  # Install Docker
+  curl -fsSL https://get.docker.com -o get-docker.sh
+  sudo sh get-docker.sh
+  
+  # Add user to docker group
+  sudo usermod -aG docker $USER
+  
+  # Deploy application
+  docker pull your-docker-username/react-ecommerce:latest
+  docker run -d -p 3000:3000 your-docker-username/react-ecommerce:latest
+  ```
+
+### Monitoring & Health Checks ✅
+- [x] **Open-source Monitoring Tools**
+  - Prometheus for metrics collection
+  - Grafana for visualization
+  - AlertManager for notifications
+  - Node Exporter for system metrics
+- [x] **Health Check Endpoint**
+  ```javascript
+  app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'UP', timestamp: new Date() });
+  });
+  ```
+- [x] **Monitoring Configuration**
+  ```yaml
+  # Prometheus scrape config
+  scrape_configs:
+    - job_name: 'react-app'
+      static_configs:
+        - targets: ['localhost:9090']
+  ```
+- [x] **Alert Rules**
+  - Application down detection
+  - High CPU/Memory usage
+  - Disk space warnings
+  - Custom metrics alerts
+- [x] **Notification Channels**
+  - Email alerts
+  - Slack integration
+  - PagerDuty (optional)
+  - Custom webhooks
+
+## 📂 Repository Structure
+
+```
+Reactjs-E-commerce-Application/
+├── src/                           # Source code
+├── public/                         # Static files
+├── backend/                        # Backend API
+├── Dockerfile                      # Container config
+├── docker-compose.yml              # Multi-service setup
+├── .gitignore                      # Git ignore rules
+├── .dockerignore                   # Docker ignore rules
+├── scripts/
+│   ├── build.sh                   # Docker build script
+│   ├── deploy.sh                  # Deployment script
+│   ├── push.sh                    # Push to Docker Hub
+│   └── monitor.sh                 # Monitoring setup
+├── .github/
+│   └── workflows/                 # GitHub Actions (optional)
+├── jenkins/
+│   ├── Jenkinsfile                # Pipeline definition
+│   └── buildspec.yml              # Build specifications
+├── monitoring/
+│   ├── prometheus.yml             # Prometheus config
+│   ├── grafana-dashboard.json     # Grafana dashboard
+│   └── alertmanager.yml           # Alert rules
+├── docs/
+│   ├── DEVOPS_SETUP.md            # DevOps setup guide
+│   ├── JENKINS_CONFIG.md          # Jenkins configuration
+│   ├── AWS_DEPLOYMENT.md          # AWS deployment guide
+│   └── MONITORING.md              # Monitoring setup
+└── README.md
+```
+
+## 🚀 Quick Start
+
+### Local Development with Docker
+
+```bash
+# Clone repository
+git clone https://github.com/Ranji-07/Reactjs-E-commerce-Application.git
+cd Reactjs-E-commerce-Application
+
+# Build and run with Docker Compose
+docker-compose up -d
+
+# Application available at: http://localhost:3000
+
+# View logs
+docker-compose logs -f app
+```
+
+### Manual Docker Build & Deploy
+
+```bash
+# Build image
+./scripts/build.sh
+
+# Push to Docker Hub
+./scripts/push.sh
+
+# Deploy to server
+./scripts/deploy.sh
+```
+
+## 📚 Documentation
+
+| Guide | Purpose |
+|-------|----------|
+| [DEVOPS_SETUP.md](./docs/DEVOPS_SETUP.md) | Docker & containerization setup |
+| [JENKINS_CONFIG.md](./docs/JENKINS_CONFIG.md) | Jenkins CI/CD configuration |
+| [AWS_DEPLOYMENT.md](./docs/AWS_DEPLOYMENT.md) | AWS EC2 deployment guide |
+| [MONITORING.md](./docs/MONITORING.md) | Monitoring & alerting setup |
+
+## 🎓 Learning Resources
+
+### Docker
+- [Docker Official Documentation](https://docs.docker.com/)
+- [Docker Best Practices](https://docs.docker.com/develop/dev-best-practices/)
+- [Multi-stage Builds](https://docs.docker.com/build/building/multi-stage/)
+
+### Jenkins
+- [Jenkins Documentation](https://www.jenkins.io/doc/)
+- [Jenkins Pipeline Guide](https://www.jenkins.io/doc/book/pipeline/)
+- [GitHub Integration](https://plugins.jenkins.io/github/)
+
+### AWS
+- [AWS EC2 Documentation](https://docs.aws.amazon.com/ec2/)
+- [Security Groups Guide](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html)
+- [AWS Best Practices](https://aws.amazon.com/architecture/best-practices/)
+
+### Monitoring
+- [Prometheus Documentation](https://prometheus.io/docs/)
+- [Grafana Getting Started](https://grafana.com/docs/grafana/latest/)
+- [AlertManager Configuration](https://prometheus.io/docs/alerting/latest/configuration/)
+
+## 💡 Key Learnings
+
+### DevOps Practices
+- ✅ Infrastructure as Code principles
+- ✅ Containerization best practices
+- ✅ CI/CD pipeline automation
+- ✅ Blue-green deployment strategies
+- ✅ Infrastructure monitoring
+
+### AWS Services
+- ✅ EC2 instance management
+- ✅ Security group configuration
+- ✅ IAM roles and policies
+- ✅ CloudWatch monitoring
+- ✅ Cost optimization
+
+### Security
+- ✅ Network segmentation
+- ✅ IP whitelisting
+- ✅ Secret management
+- ✅ Container security
+- ✅ Compliance best practices
+
+## 🤝 Contributing
+
+This is a practice project. Feel free to:
+- Fork and experiment
+- Add new features
+- Improve automation
+- Share learnings
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
+
+## 📞 Support
+
+- 📧 **Email**: [your-email@example.com](mailto:your-email@example.com)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/Ranji-07/Reactjs-E-commerce-Application/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/Ranji-07/Reactjs-E-commerce-Application/discussions)
+
+## 📜 License
+
+MIT License - see [LICENSE](./LICENSE) file for details.
+
+---
 
 <div align="center">
 
-### Full-Stack Developer | Mobile Engineer | DevOps Specialist | AI/ML Enthusiast
+**🎓 This is a DevOps & AWS Practice Project**
 
-[![Portfolio](https://img.shields.io/badge/Portfolio-Visit%20Now-blue?style=for-the-badge&logo=firefox)](https://github.com/Ranji-07)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=for-the-badge&logo=linkedin)](https://linkedin.com)
-[![Twitter](https://img.shields.io/badge/Twitter-Follow-blue?style=for-the-badge&logo=twitter)](https://twitter.com)
-[![Email](https://img.shields.io/badge/Email-Contact-red?style=for-the-badge&logo=gmail)](mailto:your-email@example.com)
+*Learn by doing real-world DevOps practices*
 
-</div>
+[Back to top](#react-e-commerce-application---devops--aws-practice-project)
 
----
-
-## 🎯 About Me
-
-I'm a passionate **Full-Stack Developer** with expertise in building scalable applications across web, mobile, and cloud infrastructure. With a strong background in **DevOps engineering** and emerging skills in **AI/ML**, I create innovative solutions that bridge the gap between cutting-edge technology and real-world problems.
-
-### 💼 Current Focus
-- 🚀 Building production-ready full-stack applications
-- 📱 Developing cross-platform mobile applications with Flutter
-- ☁️ Designing robust DevOps pipelines and cloud infrastructure
-- 🤖 Exploring AI/ML applications for intelligent automation
-- 🏗️ Architecting microservices and distributed systems
-
----
-
-## 🛠️ Technology Stack
-
-### Frontend Development
-```
-┌─────────────────────────────────────┐
-│ React.js    • JavaScript/TypeScript  │
-│ Flutter     • Dart                   │
-│ HTML5/CSS3  • Responsive Design      │
-│ State Mgmt  • Redux, Provider, BLoC  │
-│ UI/UX       • Material Design, Figma │
-└─────────────────────────────────────┘
-```
-
-### Backend Development
-```
-┌─────────────────────────────────────┐
-│ Node.js     • Express.js             │
-│ Python      • Django, FastAPI        │
-│ Databases   • PostgreSQL, MongoDB    │
-│ APIs        • REST, GraphQL          │
-│ Auth        • JWT, OAuth 2.0         │
-└─────────────────────────────────────┘
-```
-
-### Mobile Development
-```
-┌─────────────────────────────────────┐
-│ Flutter     • Cross-platform (98%+)  │
-│ Dart        • Modern, type-safe      │
-│ Native      • Swift, Kotlin          │
-│ State Mgmt  • GetX, Riverpod, BLoC   │
-│ Testing     • Unit, Widget, E2E      │
-└─────────────────────────────────────┘
-```
-
-### DevOps & Infrastructure
-```
-┌─────────────────────────────────────┐
-│ Docker      • Containerization       │
-│ Kubernetes  • Orchestration          │
-│ CI/CD       • GitHub Actions, GitLab │
-│ Cloud       • AWS, GCP, Azure        │
-│ IaC         • Terraform, Ansible     │
-│ Monitoring  • Prometheus, ELK Stack  │
-└─────────────────────────────────────┘
-```
-
-### AI & Machine Learning
-```
-┌─────────────────────────────────────┐
-│ Python      • Primary language       │
-│ TensorFlow  • Deep Learning          │
-│ PyTorch     • Neural Networks        │
-│ Scikit-learn• ML Algorithms          │
-│ NLP         • Text Processing        │
-│ Computer Vision • Image Recognition  │
-│ LLMs        • Integration, Fine-tune │
-└─────────────────────────────────────┘
-```
-
----
-
-## 📊 Skills Matrix
-
-| Category | Technologies | Proficiency |
-|----------|--------------|-------------|
-| **Languages** | JavaScript, Python, Dart, C++, SQL | ⭐⭐⭐⭐⭐ |
-| **Frontend** | React, Flutter, HTML/CSS | ⭐⭐⭐⭐⭐ |
-| **Backend** | Node.js, Python, REST APIs | ⭐⭐⭐⭐⭐ |
-| **Mobile** | Flutter, Cross-platform | ⭐⭐⭐⭐⭐ |
-| **DevOps** | Docker, K8s, CI/CD | ⭐⭐⭐⭐☆ |
-| **Cloud** | AWS, GCP, Azure | ⭐⭐⭐⭐☆ |
-| **AI/ML** | TensorFlow, PyTorch, Scikit-learn | ⭐⭐⭐☆☆ |
-| **Databases** | PostgreSQL, MongoDB, Redis | ⭐⭐⭐⭐⭐ |
-
----
-
-## 🚀 Featured Projects
-
-### 1. 📱 **Blog Me - Premium Developer Portfolio**
-*A cinematic, data-driven portfolio application showcasing technical expertise*
-
-```
-Tech Stack: Dart • Flutter • Python • C++
-Features:   Interactive UI • Real-time updates • Responsive
-Status:     In Development ✨
-```
-
-[View Repository →](https://github.com/Ranji-07/blog_me_07)
-
----
-
-### 2. 🛍️ **React E-Commerce Application**
-*Production-ready e-commerce platform with modern architecture*
-
-```
-Tech Stack: React • JavaScript • Docker • Node.js
-Features:   Product Catalog • Shopping Cart • Secure Checkout
-Status:     Active Development 🚀
-```
-
-[View Repository →](https://github.com/Ranji-07/Reactjs-E-commerce-Application)
-
----
-
-## 💡 Core Competencies
-
-### Full-Stack Development
-- ✅ End-to-end application design and development
-- ✅ RESTful and GraphQL API design
-- ✅ Database optimization and management
-- ✅ Authentication and authorization systems
-- ✅ Performance optimization and scalability
-
-### Mobile Development
-- ✅ Cross-platform app development (Flutter)
-- ✅ Native mobile development (Swift, Kotlin)
-- ✅ App state management
-- ✅ Responsive UI/UX design
-- ✅ App store deployment and publishing
-
-### DevOps & Cloud Engineering
-- ✅ Containerization and orchestration
-- ✅ CI/CD pipeline development
-- ✅ Infrastructure as Code (IaC)
-- ✅ Monitoring and logging setup
-- ✅ Security best practices implementation
-
-### AI & Machine Learning
-- ✅ Data preprocessing and analysis
-- ✅ Model training and evaluation
-- ✅ Deep learning with neural networks
-- ✅ Natural Language Processing (NLP)
-- ✅ Computer Vision applications
-- ✅ LLM integration and fine-tuning
-
----
-
-## 📈 GitHub Statistics
-
-<div align="center">
-
-![GitHub Stats](https://github-readme-stats.vercel.app/api?username=Ranji-07&show_icons=true&theme=dark&count_private=true)
-
-![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=Ranji-07&layout=compact&theme=dark)
-
-</div>
-
----
-
-## 🎓 Learning & Development
-
-I'm continuously learning and improving:
-
-- 📚 Advanced Kubernetes patterns
-- 🤖 Large Language Models (LLMs) and Prompt Engineering
-- 🔐 Security best practices and encryption
-- 📊 Data engineering and big data processing
-- 🎯 System design and architecture patterns
-
----
-
-## 🤝 Let's Collaborate
-
-I'm always interested in:
-- 🚀 Innovative full-stack projects
-- 📱 Cross-platform mobile applications
-- ☁️ Cloud-native solutions
-- 🤖 AI/ML implementations
-- 🏗️ Open-source contributions
-
-### Get in Touch
-
-- 💌 **Email**: [your-email@example.com](mailto:your-email@example.com)
-- 💼 **LinkedIn**: [Ranji-07](https://linkedin.com)
-- 🐦 **Twitter**: [@YourHandle](https://twitter.com)
-- 💻 **Portfolio**: [Visit My Projects](https://github.com/Ranji-07)
-
----
-
-## 📝 Latest Blog Posts & Articles
-
-<!-- BLOG-POST-LIST:START -->
-- 🎯 Building Scalable Full-Stack Applications
-- 📱 Flutter Best Practices for Enterprise Apps
-- ☁️ DevOps Automation with GitHub Actions
-- 🤖 Integrating AI Models into Web Applications
-<!-- BLOG-POST-LIST:END -->
-
----
-
-## ⭐ Support My Work
-
-If you find my projects useful, please consider:
-- ⭐ Starring repositories you find valuable
-- 🔗 Sharing them with your network
-- 💬 Providing feedback and suggestions
-- 🤝 Contributing to open-source projects
-
----
-
-<div align="center">
-
-### Thanks for visiting! 👋
-
-*"Code is poetry written in logic"* 💻✨
-
-[⬆ back to top](#)
+*Built with ❤️ by [Ranji-07](https://github.com/Ranji-07)*
 
 </div>
